@@ -1,0 +1,328 @@
+线性布局
+常用控件：TextView、EditText、ImageView和Button
+弹出框：Toast、ProgressBar、AlertDialog
+本次内容：
+1、常用布局
+2、计算器效果
+
+线性布局
+
+相对布局（RelativeLayout）
+相对于父元素：
+android:layout_alignParentRight="true"     父元素右侧
+android:layout_alignParentLeft="true"      父元素左侧
+android:layout_alignParentTop="true"       父元素顶部
+android:layout_alignParentBottom="true"    父元素底部
+
+相对于兄弟元素：
+android:layout_toLeftOf="@id/biaoti2"     在biaoti2的左侧
+android:layout_toRightOf="@id/biaoti2"    在biaoti2的右侧
+
+绝对布局（AbsoluteLayout）
+android:layout_x="110dp"
+android:layout_y="120dp"
+
+网络布局（GridLayout）
+父元素要配置
+android:columnCount="4"
+android:rowCount="3"     可以省略
+子元素：
+android:layout_columnWeight="1"  列权重
+android:layout_columnSpan="3"    跨3列
+
+
+ListView的交互
+
+隐式Intent
+1.请求数据
+					发起请求
+					startActivity
+					ForResult()
+				A---------——————————》B
+				<--------------------
+	处理结果	     反馈结果
+	onActivity		setResult()
+	Result()		finish();
+	startActivityForResult(Intent,int);
+	步骤1（发起请求）：
+	Intent int1=new Intent(MainActivity.this,m2.class);
+    startActivityForResult(int1,1);
+	步骤2（反馈结果）：
+		int jieguo=0;
+        for(int x=1;x<=1000;x++){
+            if(x%2==1)jieguo=jieguo+x;
+        }
+        String jg="结果："+jieguo;
+        Intent int2=new Intent();
+        int2.putExtra("jieguo",jg);
+        setResult(2,int2);
+		finish();【可选】
+	步骤3（响应结果）：
+	onActivityResult(请求码，结果码，Intent)
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1 && requestCode==2){
+            String jieguo=data.getStringExtra("jieguo");
+            Log.d("tishi",jieguo);
+        }
+    }
+
+2.授权
+静态授权：开发者在APP设计阶段，通过Manifest配置授权项，
+从而获取授权的方式。
+比如：
+（摄像头调用授权）在Manifest中，添加
+<uses-permission android:name="android.permission.CAMERA"/>
+输入<选择users-permission,输入CA，选择CAMERA，输入/，操作完成。
+动态授权：requestPermissions();
+申请动态授权：摄像头
+		requestPermissions(new String[]{
+                Manifest.permission.CAMERA
+        },6);
+动态授权结果处理：
+public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==6 && grantResults[0]==RESULT_OK){
+            Log.d("tishi","你可以拍照了");
+        }
+    }
+3.调用摄像头
+调用摄像头
+		Intent int2=new Intent();
+        int2.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(int2,2);
+
+
+
+
+利用Action属性，通过隐式Intent，实现显式Intent的效果
+区别：
+①符合条件的结果多于1个，APP会列表等待选择。
+②通过这种方式，我们可以调用其他APP的符合条件的活动。
+步骤1：给m2设置Action和category
+	<activity android:name=".m2">
+		<intent-filter>
+			<action android:name="lilun7.m2"/>
+			<category android:name="android.intent.category.DEFAULT"/>
+		</intent-filter>
+	</activity>
+步骤2：
+	Intent int12=new Intent();
+    int12.setAction("lilun7.m2");
+    startActivity(int12);
+
+显式Intent(指明目标组件，component:ComponentName)
+隐式Intent(不指明目标组件)
+隐式Intent仿作显式Intent
+Intent-filter: Action+category
+步骤1：配置m2的Intent-filter，代码如下：
+<intent-filter>
+    <action android:name="shiyan" />
+	<category android:name="android.intent.category.DEFAULT" />
+</intent-filter>
+步骤2：设置btn2方法，代码如下：
+Intent int2=new Intent();
+int2.setAction("shiyan");
+startActivity(int2);
+
+数据请求
+步骤1：发起请求(startActivityForResult)
+    public void btn3(View v){
+        Intent int1=new Intent();
+        ComponentName cn=new ComponentName(m1.this,m2.class);
+        int1.setComponent(cn);
+        startActivityForResult(int1,1);
+    }
+步骤2：反馈结果(setResult)
+	public void btn4(View v){
+        Intent int4=new Intent();
+        EditText xm=findViewById(R.id.name);
+        String xingming=xm.getText().toString();
+        int4.putExtra("name",xingming);
+        setResult(6,int4);
+		finish();
+    }
+步骤3：显示结果(onActivityResult)
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode==1 && resultCode==6){
+            String name=data.getStringExtra("name");
+            new AlertDialog.Builder(m1.this).setTitle("结果显示")
+                    .setMessage(name).setPositiveButton("ok",null)
+                    .show();
+        }
+    }
+	
+	
+	
+动画：Animation
+平移动画：translationAnimation
+	Animation anim=new TranslateAnimation(0,300,0,0);
+    anim.setDuration(2000);
+    ImageView tu=findViewById(R.id.tu);
+    tu.startAnimation(anim);
+缩放动画：
+	Animation anim=new ScaleAnimation(0.5f,1.5f,0.5f,1.5f,Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+    anim.setDuration(5000);
+    ImageView tu=findViewById(R.id.tu);
+    tu.startAnimation(anim);
+透明度动画：
+	Animation anim=new AlphaAnimation(1,0);
+    anim.setDuration(5000);
+    ImageView tu=findViewById(R.id.tu);
+    tu.startAnimation(anim);
+旋转动画：
+	Animation anim=new RotateAnimation(0,360,
+    Animation.RELATIVE_TO_SELF,0.5f,
+    Animation.RELATIVE_TO_SELF,0.5f);
+    anim.setDuration(5000);
+    ImageView tu=findViewById(R.id.tu);
+    tu.startAnimation(anim);
+
+后台服务（无页面，操作时间长，应用切换时，不影响后台服务的运行）
+应用场景：
+1.歌曲视频播放（时间比较长）
+2.上网（时间不固定）
+3.打印资料（速度慢，不需要操作界面）
+4.跨进程通信
+后台服务：
+
+java类(Service)
+四大组件之一/六大组件之一
+	Activities（活动）
+	Service（服务）
+	Content（内容）
+	Intent（意图）**
+	Broadcast Receiver（广播接收器）
+	Notification（通知）**
+
+Java类+Manifest注册
+
+Service(Service的java子类，四大组件之一，创建Java类完成Service配置；用Androidstudio提供的方式来实现。)
+
+Service的通信
+
+活动---->服务
+活动：
+        Intent int1=new Intent(MainActivity.this,Fuwu.class);
+        int1.putExtra("startnumber",1);
+        startService(int1);
+服务：
+	@Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int start=intent.getIntExtra("startnumber",-1);
+        Log.d("tishi","开始："+start);
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+服务---->活动
+服务：
+启动并绑定
+startService(int1);
+bindService(int1,conn, Service.BIND_AUTO_CREATE);
+服务声明内部类（Binder子类）
+    private MyBinder myBinder = new MyBinder();
+    class MyBinder extends Binder {
+        public int getNumber(){
+            return start;
+        }
+    }
+服务的onbind
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return myBinder;
+活动接收
+    private Fuwu.MyBinder myBinder;
+    private ServiceConnection conn=new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            myBinder=(Fuwu.MyBinder) iBinder;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            myBinder=null;
+        }
+    };
+活动显示结果
+    public void btn2(View v){
+        int num=myBinder.getNumber();
+        TextView jieguo=findViewById(R.id.jieguo);
+        jieguo.setText(""+num);
+    }
+活动断开服务连接器
+    public void btn3(View v){
+        unbindService(conn);
+    }
+                                      onstartCommand							  
+ 活动                                     服务                          
+ ServiceConnection                       onbind
+ 
+
+线程
+父类：Thread
+Run() //待完成工作
+	开线程
+    public void btn(View v){
+        new Thread(){
+            @Override
+            public void run() {  //重写run方法
+                super.run();     //执行父类的run方法
+                int jieguo=0;
+                for(int x=0;x<10000;x++){
+                    jieguo=jieguo+x;
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    TextView tv=findViewById(R.id.jieguo); //更新主线程的控件
+                    tv.setText(""+jieguo);
+                }
+            }
+        }.start();   //启动线程
+    }
+	
+intentService(工作线程处理所有请求)
+
+通知：
+
+		通知管理器            通知通道
+		    
+			          通知
+
+
+
+
+
+首选项存储
+
+文件存储
+
+数据库存储
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
